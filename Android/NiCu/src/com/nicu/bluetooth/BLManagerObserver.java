@@ -9,4 +9,6 @@ public interface BLManagerObserver {
 	
 	void onSendSuccess(String data);
 	void onSendError(String message);
+	
+	void onDataReceived(String data);
 }

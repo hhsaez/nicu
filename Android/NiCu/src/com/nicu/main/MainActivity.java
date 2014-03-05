@@ -9,6 +9,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nicu.R;
@@ -18,7 +19,7 @@ public class MainActivity extends Activity {
 	private MainViewModel viewModel;
 
 	private Button btnOn;
-	// private Button btnStop;
+	private TextView txtOutput;
 	private SeekBar sbLeftMotor;
 	private SeekBar sbRightMotor;
 
@@ -57,7 +58,7 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View arg0) {
-				viewModel.disconnect();
+				cleanup();
 			}
 
 		});
@@ -75,6 +76,8 @@ public class MainActivity extends Activity {
 			}
 
 		});
+		
+		this.txtOutput = (TextView) findViewById(R.id.txtOutput);
 
 		this.sbLeftMotor = (SeekBar) findViewById(R.id.sbLeftMotor);
 		sbLeftMotor.setOnSeekBarChangeListener(this.onSeekBarChangeLister);
@@ -93,7 +96,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
 			cleanup();
-			finish();
+			return true;
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -132,7 +135,6 @@ public class MainActivity extends Activity {
 	}
 
 	public void onDisconnectSuccess() {
-		cleanup();
 		finish();
 	}
 
@@ -162,9 +164,18 @@ public class MainActivity extends Activity {
 		});
 	}
 	
-	private void cleanup()
-	{
-		
+	public void onData(final String data) {
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				txtOutput.setText(data);
+			}
+		});
+	}
+	
+	private void cleanup() {
+		viewModel.disconnect();
 	}
 
 	public void onSendError(String message) {

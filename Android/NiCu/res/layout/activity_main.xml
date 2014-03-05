@@ -30,13 +30,12 @@
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="10dp"
 	        android:text="@string/btnOn" />
-	
-	    <Button
-	        android:id="@+id/btnStop"
+	    
+	    <TextView
+	        android:id="@+id/txtOutput"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        android:layout_marginTop="10dp"
-	        android:text="@string/btnStop" />
+	        android:layout_marginTop="10dp" />
 	
     </LinearLayout>
 

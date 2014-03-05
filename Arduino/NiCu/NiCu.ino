@@ -1,3 +1,11 @@
+#include "Ultrasonic.h"
+
+// Sensors
+int SENSOR_WAIT_MS = 50;
+Ultrasonic leftSensor( 8, 9 ); // (Trig PIN,Echo PIN)
+Ultrasonic centerSensor( 11, 10 ); // (Trig PIN,Echo PIN)
+Ultrasonic rightSensor( 13, 12 ); // (Trig PIN,Echo PIN)
+
 // Motors
 int MAX_SPEED = 255;
 int MIN_SPEED = 150;
@@ -9,6 +17,21 @@ int IN2 = 3;
 int ENB = 6;
 int IN3 = 4;
 int IN4 = 7;
+
+// utility
+unsigned long prevMillis;
+
+void rangeSweep() {
+  Serial.print( leftSensor.Ranging( CM ) ); // CM or INC
+  Serial.print( " " );
+  delay( 50 );
+  Serial.print( centerSensor.Ranging( CM ) ); // CM or INC
+  Serial.print( " " );
+  delay( 50 );
+  Serial.print( rightSensor.Ranging( CM ) ); // CM or INC
+  Serial.println( "" );
+  delay( 50 );
+}
 
 void setupBT()
 {
@@ -116,13 +139,22 @@ void setup()
 {
   pinMode( 13, OUTPUT );
   Serial.begin( 9600 );
+  Serial.setTimeout( 100 );
   
   setupBT();
   setupMotors();
+  
+  prevMillis = millis();
 }
 
 void loop() 
 {
+  int currMillis = millis();
+  if ( currMillis - prevMillis >= 1000 ) {
+    rangeSweep();
+    prevMillis = currMillis;
+  }
+  
   while ( Serial.available() > 0 ) {
     char c = Serial.read();
     switch ( c ) {

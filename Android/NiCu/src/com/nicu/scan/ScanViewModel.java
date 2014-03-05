@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import com.nicu.bluetooth.BLManager;
+import com.nicu.bluetooth.BTManager;
 
 public class ScanViewModel {
 	
@@ -39,10 +39,10 @@ public class ScanViewModel {
 	
 	public void resume()
 	{
-		if (!BLManager.getInstance().isBluetoothSupported()) {
+		if (!BTManager.getInstance().isBluetoothSupported()) {
 			this.activity.onBLUnsupported();
 		}
-		else if (!BLManager.getInstance().isBluetoothEnabled()) {
+		else if (!BTManager.getInstance().isBluetoothEnabled()) {
 			this.activity.onBLDisabled();
 		}		
 		else {
@@ -57,9 +57,11 @@ public class ScanViewModel {
 	
 	private void startScanning()
 	{
+		this.devices.clear();
+		
 		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
 		this.activity.registerReceiver(receiver, filter);
-		this.scanning = BLManager.getInstance().startDiscovery();
+		this.scanning = BTManager.getInstance().startDiscovery();
 		if (scanning) {
 			this.activity.onScanStarted();
 		}
@@ -69,7 +71,7 @@ public class ScanViewModel {
 	{
 		if (this.scanning) {
 			this.activity.unregisterReceiver(receiver);
-			this.scanning = !BLManager.getInstance().cancelDiscovery();
+			this.scanning = !BTManager.getInstance().cancelDiscovery();
 		}
 		
 		if (!this.scanning) {
@@ -79,7 +81,7 @@ public class ScanViewModel {
 	
 	public boolean connectToDevice(BluetoothDevice device)
 	{
-		return BLManager.getInstance().connect(device);
+		return BTManager.getInstance().connect(device);
 	}
 	
 }

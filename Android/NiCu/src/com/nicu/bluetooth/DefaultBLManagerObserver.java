@@ -33,5 +33,10 @@ public class DefaultBLManagerObserver implements BLManagerObserver {
 	public void onSendError(String message) {
 		Log.error("Send error: " + message);
 	}
+	
+	@Override
+	public void onDataReceived(String data) {
+		Log.info("Received: " + data);		
+	}
 
 }
