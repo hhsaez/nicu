@@ -1,8 +1,7 @@
 package com.nicu.scan;
 
+import java.io.IOException;
 import java.util.List;
-
-import com.nicu.main.MainActivity;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -12,31 +11,48 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.nicu.httpd.NiCuHTTPD;
+import com.nicu.main.MainActivity;
 
 public class ScanActivity extends ListActivity {
 	
 	private static final int REQUEST_ENABLE_BT = 1;
 	
 	private ScanViewModel viewModel;
+	
+	private NiCuHTTPD httpServer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		
 		this.viewModel = new ScanViewModel(this);
+		this.httpServer = new NiCuHTTPD();
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
+		
+		this.httpServer.stop();
 		this.viewModel.pause();
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		try {
+			this.httpServer.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		this.viewModel.resume();
 	}
 
