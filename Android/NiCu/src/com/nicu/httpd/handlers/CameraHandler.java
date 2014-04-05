@@ -32,6 +32,8 @@ public class CameraHandler extends RequestHandler {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			output.compress(CompressFormat.JPEG, 20, bos);
 			setInputStream(new ByteArrayInputStream(bos.toByteArray()));
+			
+			Log.debug("Here it goes!!");
 		}
 	};
 
@@ -76,6 +78,7 @@ public class CameraHandler extends RequestHandler {
 					"Invalid picture result");
 		}
 		
+		Log.debug("response");
 		return new Response(Response.Status.OK, RequestHandler.RESPONSE_MIME_JPG, getInputStream());
 	}
 

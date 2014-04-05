@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NiCu Management Console</title>
+
+    <!-- jQuery -->
+    <script src="jquery/jquery-1.11.0.min.js"></script>
+
+    <style type="text/css">
+    	body {
+  			background-color: #eee;
+		}
+
+		.camera {
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			z-index: -9999;
+		}
+
+		.camera img {
+			width: 100%;
+			height: 100%;
+		}
+
+		.controls {
+			padding: 10px;
+			float: left;
+		}
+
+		.controls .btn {
+			width: 100px;
+		}
+    </style>
+
+    <script type="text/javascript">
+    	var robotIp = "";
+
+    	function getBaseUrl() {
+    		return "/robot";
+    	}
+
+    	function showMessage(msg) {
+    		$('.output').html(msg);
+    	}
+
+    	function updateCamera() {
+    		var img = new Image();
+    		img.onload = function() {
+    			$('.camera').html(this);
+	    		setTimeout(updateCamera, 1000);
+    		};
+    		img.src = "/robot/camera";
+    	}
+
+    	function moveRobotForward() {
+    		$.get(getBaseUrl() + "/forward", function() {
+    			showMessage("Moving robot forward");
+    		});
+    	}
+
+    	function moveRobotBackward() {
+    		$.get(getBaseUrl() + "/backward", function() {
+    			showMessage("Moving robot backward");
+    		});
+    	}
+
+    	function rotateRobotLeft() {
+    		$.get(getBaseUrl() + "/left", function() {
+    			showMessage("Rotating robot left");
+    		});
+    	}
+
+    	function rotateRobotRight() {
+    		$.get(getBaseUrl() + "/right", function() {
+    			showMessage("Rotating robot right");
+    		});
+    	}
+
+    	function stopRobot() {
+    		$.get(getBaseUrl() + "/stop", function() {
+    			showMessage("Stop robot");
+    		});
+    	}
+
+    	function startConsole() {
+
+    		$('.btn-robot-forward').click(moveRobotForward);
+    		$('.btn-robot-backward').click(moveRobotBackward);
+    		$('.btn-robot-left').click(rotateRobotLeft);
+    		$('.btn-robot-right').click(rotateRobotRight);
+    		$('.btn-robot-stop').click(stopRobot);
+
+    		updateCamera();
+    	}
+
+    	$(document).ready(function() {
+    		startConsole();
+    	});
+    </script>
+</head>
+<body>
+    <div id="console" class="console">
+    	<div class="camera"></div>
+    	<div class="controls">
+    		<button class="btn btn-robot-forward">Forward</button>
+    		<button class="btn btn-robot-backward">Backward</button>
+    		<button class="btn btn-robot-left">Left</button>
+    		<button class="btn btn-robot-right">Right</button>
+    		<button class="btn btn-robot-stop">Stop</button>
+    		<span class="output">Robot Idle</span>
+    	</div>
+	</div>
+</body>
+</html>
+

@@ -32,7 +32,9 @@ public class ScanActivity extends ListActivity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		
 		this.viewModel = new ScanViewModel(this);
-		this.httpServer = new NiCuHTTPD();
+		this.httpServer = new NiCuHTTPD(this);
+		
+		getActionBar().setTitle(this.httpServer.getAddress());
 	}
 	
 	@Override

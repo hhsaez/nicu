@@ -22,3 +22,5 @@ local.properties
 aylaremote-android-it/target/
 .classpath
 .project
+
+/Web/node_modules
