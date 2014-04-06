@@ -83,6 +83,8 @@ public class MainActivity extends Activity {
 		sbLeftMotor.setOnSeekBarChangeListener(this.onSeekBarChangeLister);
 		this.sbRightMotor = (SeekBar) findViewById(R.id.sbRightMotor);
 		sbRightMotor.setOnSeekBarChangeListener(this.onSeekBarChangeLister);
+		
+		getActionBar().setTitle(this.viewModel.getAddress());
 	}
 
 	@Override

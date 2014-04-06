@@ -9,9 +9,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.format.Formatter;
 
-import com.nicu.httpd.handlers.CameraHandler;
 import com.nicu.httpd.handlers.RequestHandler;
-import com.nicu.httpd.handlers.StatusHandler;
 
 public class NiCuHTTPD extends NanoHTTPD {
 	
@@ -22,11 +20,7 @@ public class NiCuHTTPD extends NanoHTTPD {
 
 	public NiCuHTTPD(Context context) {
 		super(DEFAULT_HTTP_PORT);
-		
 		this.context = context;
-		
-		registerHandler(new StatusHandler());
-		registerHandler(new CameraHandler());
 	}
 	
 	@Override
@@ -72,7 +66,7 @@ public class NiCuHTTPD extends NanoHTTPD {
 		return "http://" + ipAddress + ":" + DEFAULT_HTTP_PORT;
 	}
 	
-	private void registerHandler(RequestHandler handler)
+	public void registerHandler(RequestHandler handler)
 	{
 		this.handlers.put(handler.getName(), handler);
 	}
