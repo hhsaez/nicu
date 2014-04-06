@@ -16,7 +16,8 @@ public class RotateRightHandler extends RequestHandler {
 
 	@Override
 	public Response handleRequest(IHTTPSession session) {
-		this.robot.setMotorsSpeed(Robot.MOTOR_MAX_SPEED, Robot.MOTOR_MIN_SPEED);
+		this.robot.turnRight();
+		
 		Response response = new Response("no information yet");
 		return response;
 	}

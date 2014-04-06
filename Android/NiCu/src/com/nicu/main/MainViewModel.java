@@ -3,6 +3,11 @@ package com.nicu.main;
 import java.io.IOException;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 
 import com.nicu.bluetooth.BLManagerObserver;
 import com.nicu.bluetooth.BTManager;
@@ -17,13 +22,14 @@ import com.nicu.httpd.handlers.StopMovementHandler;
 import com.nicu.model.Robot;
 import com.nicu.utils.Log;
 
-public class MainViewModel implements BLManagerObserver, Robot.Observer {
+public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorEventListener {
 	
 	private MainActivity activity;
 	
 	private boolean connected;
 	private boolean ledOn;
 	private NiCuHTTPD httpServer;
+	private SensorManager sensorManager;
 
 	private Robot robot = new Robot();
 	
@@ -31,8 +37,11 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer {
 	{
 		this.robot = new Robot();
 		this.robot.addObserver(this);
+		this.robot.setEnsureSpeeds(true);
 		
 		this.activity = activity;
+		
+		this.sensorManager = (SensorManager) this.activity.getSystemService(Context.SENSOR_SERVICE);
 		
 		this.httpServer = new NiCuHTTPD(this.activity);
 		this.httpServer.registerHandler(new StatusHandler());
@@ -46,6 +55,12 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer {
 	
 	public void onResume()
 	{
+		if (!this.robot.isRunning()) {
+			this.robot.run();
+		}
+		
+		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_GAME);
+		
 		BTManager.getInstance().setObserver(this);
 		
 		try {
@@ -57,6 +72,10 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer {
 	
 	public void onPause()
 	{
+		this.robot.shutdown();
+		
+		sensorManager.unregisterListener(this);
+		
 		BTManager.getInstance().setObserver(null);
 		BTManager.getInstance().disconnect();
 		
@@ -159,9 +178,21 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer {
 		this.activity.onData(data);
 	}
 	
+	public void onSensorChanged(SensorEvent event) {
+		// get the angle around the z-axis rotated
+        float azimuth = (float)(event.values[0] * Math.PI / 180.0f);
+        this.robot.setCurrentHeading(azimuth);
+	}
+	
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		// unused
+	}
+	
 	@Override
 	public void onSpeedChanged(Robot robot) {
 		changeMotorsSpeed(robot.getLeftMotorSpeed(), robot.getRightMotorSpeed());
+		this.activity.onMotorsSpeedChanged(robot.getLeftMotorSpeed(), robot.getRightMotorSpeed());
 	}
 	
 }

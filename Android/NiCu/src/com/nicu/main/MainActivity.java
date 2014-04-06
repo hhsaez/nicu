@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
 				boolean fromUser) {
 			int leftValue = sbLeftMotor.getProgress();
 			int rightValue = sbRightMotor.getProgress();
-			viewModel.changeMotorsSpeed(leftValue, rightValue, 0, 200);
+			//viewModel.changeMotorsSpeed(leftValue, rightValue, 0, 200);
 		}
 	};
 
@@ -182,6 +182,11 @@ public class MainActivity extends Activity {
 
 	public void onSendError(String message) {
 		showMessage(message);
+	}
+	
+	public void onMotorsSpeedChanged(int left, int right) {
+		this.sbLeftMotor.setProgress(100 + left);
+		this.sbRightMotor.setProgress(100 + right);
 	}
 
 }

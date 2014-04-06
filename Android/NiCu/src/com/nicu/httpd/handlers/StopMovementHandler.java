@@ -16,7 +16,8 @@ public class StopMovementHandler extends RequestHandler {
 
 	@Override
 	public Response handleRequest(IHTTPSession session) {
-		this.robot.setMotorsSpeed(0, 0);
+		this.robot.stop();
+		
 		Response response = new Response("no information yet");
 		return response;
 	}

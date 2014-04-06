@@ -16,7 +16,7 @@ public class MoveForwardHandler extends RequestHandler {
 
 	@Override
 	public Response handleRequest(IHTTPSession session) {
-		this.robot.setMotorsSpeed(Robot.MOTOR_MAX_SPEED, Robot.MOTOR_MAX_SPEED);
+		this.robot.moveForward();
 		
 		Response response = new Response("no information yet");
 		return response;

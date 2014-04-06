@@ -5,6 +5,9 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     
+    <string name="menu_btn_connect">Connect</string>
+    <string name="menu_btn_test">Test</string>
+    
     <string name="btnConnect">Connect</string>
     <string name="btnDisconnect">Disconnect</string>
     <string name="btnOn">ON</string>
