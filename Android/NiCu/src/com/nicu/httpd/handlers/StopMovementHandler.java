@@ -6,17 +6,13 @@ import com.nicu.model.Robot;
 
 public class StopMovementHandler extends RequestHandler {
 	
-	private Robot robot;
-	
-	public StopMovementHandler(Robot robot) {
+	public StopMovementHandler() {
 		super("/robot/stop");
-		
-		this.robot = robot;
 	}
 
 	@Override
 	public Response handleRequest(IHTTPSession session) {
-		this.robot.stop();
+		Robot.getInstance().stop();
 		
 		Response response = new Response("no information yet");
 		return response;

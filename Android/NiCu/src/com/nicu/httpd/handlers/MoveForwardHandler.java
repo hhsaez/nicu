@@ -6,17 +6,13 @@ import com.nicu.model.Robot;
 
 public class MoveForwardHandler extends RequestHandler {
 	
-	private Robot robot;
-	
-	public MoveForwardHandler(Robot robot) {
+	public MoveForwardHandler() {
 		super("/robot/forward");
-		
-		this.robot = robot;
 	}
 
 	@Override
 	public Response handleRequest(IHTTPSession session) {
-		this.robot.moveForward();
+		Robot.getInstance().moveForward();
 		
 		Response response = new Response("no information yet");
 		return response;

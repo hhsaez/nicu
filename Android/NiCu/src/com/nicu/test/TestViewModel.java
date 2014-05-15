@@ -25,31 +25,28 @@ public class TestViewModel implements Robot.Observer, SensorEventListener {
 	private NiCuHTTPD httpServer;
 	private SensorManager sensorManager;
 
-	private Robot robot = new Robot();
-	
 	public TestViewModel(TestActivity activity) {
 		this.activity = activity;
 		
 		this.sensorManager = (SensorManager) this.activity.getSystemService(Context.SENSOR_SERVICE);
 		
-		this.robot = new Robot();
-		this.robot.addObserver(this);
-		this.robot.setEnsureSpeeds(false);
+		Robot.getInstance().addObserver(this);
+		Robot.getInstance().setEnsureSpeeds(true);
 		
 		this.httpServer = new NiCuHTTPD(this.activity);
 		this.httpServer.registerHandler(new StatusHandler());
 		this.httpServer.registerHandler(new CameraHandler());
-		this.httpServer.registerHandler(new MoveForwardHandler(this.robot));
-		this.httpServer.registerHandler(new MoveBackwardHandler(this.robot));
-		this.httpServer.registerHandler(new RotateLeftHandler(this.robot));
-		this.httpServer.registerHandler(new RotateRightHandler(this.robot));
-		this.httpServer.registerHandler(new StopMovementHandler(this.robot));
+		this.httpServer.registerHandler(new MoveForwardHandler());
+		this.httpServer.registerHandler(new MoveBackwardHandler());
+		this.httpServer.registerHandler(new RotateLeftHandler());
+		this.httpServer.registerHandler(new RotateRightHandler());
+		this.httpServer.registerHandler(new StopMovementHandler());
 	}
 	
 	public void onResume()
 	{
-		if (!this.robot.isRunning()) {
-			this.robot.run();
+		if (!Robot.getInstance().isRunning()) {
+			Robot.getInstance().run();
 		}
 		
 		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_GAME);
@@ -64,7 +61,7 @@ public class TestViewModel implements Robot.Observer, SensorEventListener {
 	public void onPause()
 	{
 		sensorManager.unregisterListener(this);
-		this.robot.shutdown();
+		Robot.getInstance().shutdown();
 		this.httpServer.stop();
 	}
 
@@ -76,7 +73,7 @@ public class TestViewModel implements Robot.Observer, SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
 		// get the angle around the z-axis rotated
         float azimuth = (float)(event.values[0] * Math.PI / 180.0f);
-        this.robot.setCurrentHeading(azimuth);
+        Robot.getInstance().setCurrentHeading(azimuth);
 	}
 	
 	@Override

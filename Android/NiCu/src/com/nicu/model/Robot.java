@@ -3,13 +3,14 @@ package com.nicu.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.nicu.utils.Log;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Robot {
 	
 	public static final int MOTOR_MAX_SPEED = 100;
-	public static final int MOTOR_CRUISE_SPEED = 90;
-	public static final int MOTOR_MIN_SPEED = -100;
+	public static final int MOTOR_MIN_SPEED = 75;
+	public static final int MOTOR_SPEED_THRESHOLD = 10;
 	
 	private static Robot instance = null;
 	
@@ -96,12 +97,12 @@ public class Robot {
 	}
 	
 	public void turnLeft() {
-		setDesiredHeading(getCurrentHeading() + (float)Math.PI / 2.0f);
+		setDesiredHeading(getCurrentHeading() - (float)Math.PI / 2.0f);
 		V = 0.0f;
 	}
 	
 	public void turnRight() {
-		setDesiredHeading(getCurrentHeading() - (float)Math.PI / 2.0f);
+		setDesiredHeading(getCurrentHeading() + (float)Math.PI / 2.0f);
 		V = 0.0f;
 	}
 	
@@ -126,23 +127,18 @@ public class Robot {
 
 	private int clampSpeed(int input) {
 		if (this.ensureSpeed) {
-			if (input > (MOTOR_MAX_SPEED / 3) && input < MOTOR_CRUISE_SPEED) {
-				return MOTOR_CRUISE_SPEED;
+			if (input < -MOTOR_SPEED_THRESHOLD && input > -MOTOR_MIN_SPEED) {
+				return -MOTOR_MIN_SPEED;
 			}
-			else if (input > MOTOR_MAX_SPEED) {
-				return MOTOR_MAX_SPEED;
+			else if (input > MOTOR_SPEED_THRESHOLD && input < MOTOR_MIN_SPEED) {
+				return MOTOR_MIN_SPEED;
 			}
-			else if (input < (-MOTOR_MAX_SPEED / 3) && input > -MOTOR_CRUISE_SPEED) {
-				return -MOTOR_CRUISE_SPEED;
+			else {
+				return 0;
 			}
-			else if (input < -MOTOR_MAX_SPEED) {
-				return -MOTOR_MAX_SPEED;
-			}
-			
-			return input;
 		}
 		else {
-			return Math.max(MOTOR_MIN_SPEED, Math.min(MOTOR_MAX_SPEED, input));
+			return Math.max(-MOTOR_MAX_SPEED, Math.min(MOTOR_MAX_SPEED, input));
 		}
 	}
 	
@@ -175,8 +171,6 @@ public class Robot {
 						float vL = (2 * V - w * L ) / (2.0f * R);
 						
 						setMotorsSpeed((int) vL, (int) vR);
-						
-						Log.debug("" + getCurrentHeading() + " " + getDesiredHeading());
 					}
 				}
 			}
@@ -185,6 +179,17 @@ public class Robot {
 	
 	public void shutdown() {
 		this.running = false;
+	}
+	
+	public JSONObject toJSON() throws JSONException
+	{
+		JSONObject json = new JSONObject();
+		json.put("left", this.getLeftMotorSpeed());
+		json.put("right", this.getRightMotorSpeed());
+		json.put("currentHeading", this.getCurrentHeading());
+		json.put("desiredHeading", this.getDesiredHeading());
+		
+		return json;
 	}
 
 }

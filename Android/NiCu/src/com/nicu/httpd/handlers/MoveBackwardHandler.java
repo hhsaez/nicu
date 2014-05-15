@@ -6,17 +6,13 @@ import com.nicu.model.Robot;
 
 public class MoveBackwardHandler extends RequestHandler {
 	
-	private Robot robot;
-	
-	public MoveBackwardHandler(Robot robot) {
+	public MoveBackwardHandler() {
 		super("/robot/backward");
-		
-		this.robot = robot;
 	}
 
 	@Override
 	public Response handleRequest(IHTTPSession session) {
-		this.robot.turnBack();
+		Robot.getInstance().turnBack();
 		
 		Response response = new Response("no information yet");
 		return response;

@@ -6,17 +6,13 @@ import com.nicu.model.Robot;
 
 public class RotateRightHandler extends RequestHandler {
 	
-	private Robot robot;
-	
-	public RotateRightHandler(Robot robot) {
+	public RotateRightHandler() {
 		super("/robot/right");
-		
-		this.robot = robot;
 	}
 
 	@Override
 	public Response handleRequest(IHTTPSession session) {
-		this.robot.turnRight();
+		Robot.getInstance().turnRight();
 		
 		Response response = new Response("no information yet");
 		return response;

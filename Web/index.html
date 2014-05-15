@@ -12,6 +12,8 @@
     <style type="text/css">
     	body {
   			background-color: #eee;
+            padding: 0;
+            margin: 0;
 		}
 
 		.camera {
@@ -34,6 +36,13 @@
 		.controls .btn {
 			width: 100px;
 		}
+
+        .status {
+            float: right;
+            color: white;
+            padding: 5px;
+            width: 200px;
+        }
     </style>
 
     <script type="text/javascript">
@@ -51,8 +60,12 @@
     		var img = new Image();
     		img.onload = function() {
     			$('.camera').html(this);
-	    		setTimeout(updateCamera, 1000);
+	    		setTimeout(updateCamera, 2000);
     		};
+            img.onerror = function(e) {
+                console.log("Error loading image:", e);
+                setTimeout(updateCamera, 2000);                
+            }
     		img.src = "/robot/camera";
     	}
 
@@ -86,6 +99,18 @@
     		});
     	}
 
+        function updateStatus() {
+            $.get(getBaseUrl() + "/status", function(response) {
+                var robot = $.parseJSON(response);
+
+                $('#status-motor-left').html(robot.left);
+                $('#status-motor-right').html(robot.right);
+                $('#status-heading-current').html(180.0 / Math.PI * robot.currentHeading);
+                $('#status-heading-desired').html(180.0 / Math.PI * robot.desiredHeading);
+            });
+            setTimeout(updateStatus, 500);
+        }
+
     	function startConsole() {
 
     		$('.btn-robot-forward').click(moveRobotForward);
@@ -95,6 +120,7 @@
     		$('.btn-robot-stop').click(stopRobot);
 
     		updateCamera();
+            updateStatus();
     	}
 
     	$(document).ready(function() {
@@ -113,6 +139,20 @@
     		<button class="btn btn-robot-stop">Stop</button>
     		<span class="output">Robot Idle</span>
     	</div>
+        <div class="status">
+            <div class="status-line">
+                Left Motor:&nbsp;<span class="status-value" id="status-motor-left">N/A</span>
+            </div>
+            <div class="status-line">
+                Right Motor:&nbsp;<span class="status-value" id="status-motor-right">N/A</span>
+            </div>
+            <div class="status-line">
+                Current Heading:&nbsp;<span class="status-value" id="status-heading-current">N/A</span>
+            </div>
+            <div class="status-line">
+                Desired Heading:&nbsp;<span class="status-value" id="status-heading-desired">N/A</span>
+            </div>
+        </div>
 	</div>
 </body>
 </html>
