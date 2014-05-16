@@ -6,8 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
@@ -27,11 +28,19 @@ public class CameraHandler extends RequestHandler {
 		public void onPictureTaken(byte[] data, Camera camera) {
 			
 			Bitmap input = BitmapFactory.decodeByteArray(data, 0, data.length);
-			Bitmap output = Bitmap.createScaledBitmap(input, 640, 480, false);
+			Bitmap output = RotateBitmap(Bitmap.createScaledBitmap(input, 640, 480, false), -90);
+			
 			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			output.compress(CompressFormat.JPEG, 20, bos);
 			setInputStream(new ByteArrayInputStream(bos.toByteArray()));
+		}
+		
+		public Bitmap RotateBitmap(Bitmap source, float angle)
+		{
+			Matrix matrix = new Matrix();
+			matrix.postRotate(angle);
+			return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
 		}
 	};
 

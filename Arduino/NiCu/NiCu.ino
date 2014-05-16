@@ -168,6 +168,13 @@ void loop()
         setRightMotorSpeed( spd );
         break;
       }
+      case 'S': {
+        int t = Serial.parseInt();
+        delay( t );
+        setLeftMotorSpeed( 0 );
+        setRightMotorSpeed( 0 );
+        break;
+      }
       case 'W': {
         digitalWrite( 13, HIGH );
         delay( 1000 );

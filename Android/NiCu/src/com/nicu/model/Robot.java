@@ -9,7 +9,7 @@ import org.json.JSONObject;
 public class Robot {
 	
 	public static final int MOTOR_MAX_SPEED = 100;
-	public static final int MOTOR_MIN_SPEED = 75;
+	public static final int MOTOR_MIN_SPEED = 90;
 	public static final int MOTOR_SPEED_THRESHOLD = 10;
 	
 	private static Robot instance = null;
@@ -39,7 +39,9 @@ public class Robot {
 	private float R = 2.5f;		// wheel radius
 	private float V = 0.0f;		// current velocity [-100, 100]
 	
-	private float kP = 10.0f;	// proportional gain
+	private float kP = 30.0f;	// proportional gain
+	
+	private int orderTimeout = 200;
 	
 	private boolean running = false;
 	
@@ -188,8 +190,17 @@ public class Robot {
 		json.put("right", this.getRightMotorSpeed());
 		json.put("currentHeading", this.getCurrentHeading());
 		json.put("desiredHeading", this.getDesiredHeading());
+		json.put("orderTimeout", this.getOrderTimeout());
 		
 		return json;
+	}
+
+	public int getOrderTimeout() {
+		return orderTimeout;
+	}
+
+	public void setOrderTimeout(int orderTimeout) {
+		this.orderTimeout = orderTimeout;
 	}
 
 }

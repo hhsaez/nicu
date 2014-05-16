@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="18"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="19" />
     
 	<uses-permission android:name="android.permission.BLUETOOTH" />
 	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -16,6 +16,7 @@
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.CAMERA"/>
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
     
     <application
         android:allowBackup="true"
@@ -36,18 +37,21 @@
             android:name="com.nicu.scan.ScanActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:parentActivityName="com.nicu.menu.MenuActivity"
+            android:keepScreenOn="true"
             android:label="@string/app_name" >
         </activity>
         <activity
             android:name="com.nicu.main.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:parentActivityName="com.nicu.scan.ScanActivity"
+            android:keepScreenOn="true"
             android:label="@string/app_name" >
         </activity>
         <activity
             android:name="com.nicu.test.TestActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:parentActivityName="com.nicu.menu.MenuActivity"
+            android:keepScreenOn="true"
             android:label="@string/app_name" >
         </activity>
    	</application>

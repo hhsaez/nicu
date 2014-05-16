@@ -1,10 +1,11 @@
 package com.nicu.test;
 
-import com.nicu.R;
-
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.SeekBar;
+
+import com.nicu.R;
 
 public class TestActivity extends Activity {
 	
@@ -24,6 +25,7 @@ public class TestActivity extends Activity {
 		this.sbRightMotor = (SeekBar) findViewById(R.id.sbRightMotor);
 		
 		getActionBar().setTitle(this.viewModel.getAddress());
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 	
 	@Override

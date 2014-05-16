@@ -34,7 +34,7 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorE
 	public MainViewModel(MainActivity activity)
 	{
 		Robot.getInstance().addObserver(this);
-		Robot.getInstance().setEnsureSpeeds(true);
+//		Robot.getInstance().setEnsureSpeeds(true);
 		
 		this.activity = activity;
 		
@@ -124,11 +124,11 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorE
 		int leftSpeed = leftValue - ( maxValue - minValue ) / 2;
 		int rightSpeed = rightValue - ( maxValue - minValue ) / 2;
 		
-		changeMotorsSpeed(leftSpeed, rightSpeed);
+		changeMotorsSpeed(leftSpeed, rightSpeed, 100);
 	}
 	
-	public void changeMotorsSpeed(int left, int right) {
-		String command = "L " + left + " R " + right;
+	public void changeMotorsSpeed(int left, int right, int timeout) {
+		String command = "L " + left + " R " + right + " S timeout";
 		Log.debug(command);
 		BTManager.getInstance().sendData(command);
 	}
@@ -188,7 +188,7 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorE
 	
 	@Override
 	public void onSpeedChanged(Robot robot) {
-		changeMotorsSpeed(robot.getLeftMotorSpeed(), robot.getRightMotorSpeed());
+		changeMotorsSpeed(robot.getLeftMotorSpeed(), robot.getRightMotorSpeed(), robot.getOrderTimeout());
 		this.activity.onMotorsSpeedChanged(robot.getLeftMotorSpeed(), robot.getRightMotorSpeed());
 	}
 	

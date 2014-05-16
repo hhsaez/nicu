@@ -60,11 +60,11 @@
     		var img = new Image();
     		img.onload = function() {
     			$('.camera').html(this);
-	    		setTimeout(updateCamera, 2000);
+	    		setTimeout(updateCamera, 1000);
     		};
             img.onerror = function(e) {
                 console.log("Error loading image:", e);
-                setTimeout(updateCamera, 2000);                
+                setTimeout(updateCamera, 1000);                
             }
     		img.src = "/robot/camera";
     	}
