@@ -14,6 +14,11 @@ app.get('/robot/*', function(req, res) {
   	req.pipe(request(url)).pipe(res);
 });
 
+app.put('/robot/*', function(req, res) {
+	var url = 'http://' + robotIp + req.url;
+  	req.pipe(request(url)).pipe(res);
+});
+
 app.get('/', function(req, res) {
 	res.sendfile(__dirname + '/index.html');
 });

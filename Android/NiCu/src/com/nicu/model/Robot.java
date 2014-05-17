@@ -9,8 +9,6 @@ import org.json.JSONObject;
 public class Robot {
 	
 	public static final int MOTOR_MAX_SPEED = 100;
-	public static final int MOTOR_MIN_SPEED = 90;
-	public static final int MOTOR_SPEED_THRESHOLD = 10;
 	
 	private static Robot instance = null;
 	
@@ -30,7 +28,9 @@ public class Robot {
 	
 	private int leftMotorSpeed = 0;
 	private int rightMotorSpeed = 0;
-	private boolean ensureSpeed = false;
+	private int minSpeed = 90;
+	private int speedThreshold = 10;
+	private boolean clampSpeed = false;
 	
 	private float currentHeading = 0;
 	private float desiredHeading = 0;
@@ -69,12 +69,12 @@ public class Robot {
 		return this.rightMotorSpeed;
 	}
 	
-	public boolean shouldEnsureSpeeds() {
-		return this.ensureSpeed;
+	public boolean getClampSpeed() {
+		return this.clampSpeed;
 	}
 	
-	public void setEnsureSpeeds(boolean value) {
-		this.ensureSpeed = value;
+	public void setClampSpeed(boolean value) {
+		this.clampSpeed = value;
 	}
 	
 	public void setCurrentHeading(float value) {
@@ -95,7 +95,7 @@ public class Robot {
 	
 	public void moveForward() {
 		setDesiredHeading(getCurrentHeading());
-		V = MOTOR_MAX_SPEED;
+		V = 2.0f * MOTOR_MAX_SPEED;
 	}
 	
 	public void turnLeft() {
@@ -119,24 +119,24 @@ public class Robot {
 	}
 	
 	private void setMotorsSpeed(int left, int right) {
-		this.leftMotorSpeed = clampSpeed(left);
-		this.rightMotorSpeed = clampSpeed(right);
+		this.leftMotorSpeed = clampSpeedIfNeeded(left);
+		this.rightMotorSpeed = clampSpeedIfNeeded(right);
 		
 		for (Observer o : this.observers) {
 			o.onSpeedChanged(this);
 		}
 	}
 
-	private int clampSpeed(int input) {
-		if (this.ensureSpeed) {
-			if (input < -MOTOR_SPEED_THRESHOLD && input > -MOTOR_MIN_SPEED) {
-				return -MOTOR_MIN_SPEED;
+	private int clampSpeedIfNeeded(int input) {
+		if (this.clampSpeed) {
+			if (input < -getSpeedThreshold() && input > -getMinSpeed()) {
+				return -getMinSpeed();
 			}
-			else if (input > MOTOR_SPEED_THRESHOLD && input < MOTOR_MIN_SPEED) {
-				return MOTOR_MIN_SPEED;
+			else if (input > getSpeedThreshold() && input < getMinSpeed()) {
+				return getMinSpeed();
 			}
 			else {
-				return 0;
+				return input;
 			}
 		}
 		else {
@@ -169,8 +169,8 @@ public class Robot {
 						
 						float w = kP * e_k;
 						
-						float vR = (2 * V + w * L ) / (2.0f * R);
-						float vL = (2 * V - w * L ) / (2.0f * R);
+						float vR = (2.0f * V + w * L ) / (2.0f * R);
+						float vL = (2.0f * V - w * L ) / (2.0f * R);
 						
 						setMotorsSpeed((int) vL, (int) vR);
 					}
@@ -183,24 +183,70 @@ public class Robot {
 		this.running = false;
 	}
 	
-	public JSONObject toJSON() throws JSONException
-	{
-		JSONObject json = new JSONObject();
-		json.put("left", this.getLeftMotorSpeed());
-		json.put("right", this.getRightMotorSpeed());
-		json.put("currentHeading", this.getCurrentHeading());
-		json.put("desiredHeading", this.getDesiredHeading());
-		json.put("orderTimeout", this.getOrderTimeout());
-		
-		return json;
-	}
-
 	public int getOrderTimeout() {
 		return orderTimeout;
 	}
 
 	public void setOrderTimeout(int orderTimeout) {
 		this.orderTimeout = orderTimeout;
+	}
+
+	public float getkP() {
+		return kP;
+	}
+
+	public void setkP(float kP) {
+		this.kP = kP;
+	}
+
+	public int getMinSpeed() {
+		return minSpeed;
+	}
+
+	public void setMinSpeed(int minSpeed) {
+		this.minSpeed = minSpeed;
+	}
+
+	public int getSpeedThreshold() {
+		return speedThreshold;
+	}
+
+	public void setSpeedThreshold(int speedThreshold) {
+		this.speedThreshold = speedThreshold;
+	}
+
+	public JSONObject toJSON() throws JSONException
+	{
+		JSONObject json = new JSONObject();
+		json.put("left", this.getLeftMotorSpeed());
+		json.put("right", this.getRightMotorSpeed());
+		json.put("minSpeed", this.getMinSpeed());
+		json.put("speedThreshold", this.getSpeedThreshold());
+		json.put("currentHeading", this.getCurrentHeading());
+		json.put("desiredHeading", this.getDesiredHeading());
+		json.put("orderTimeout", this.getOrderTimeout());
+		json.put("clampSpeed", this.getClampSpeed());
+		json.put("kP", this.getkP());
+		return json;
+	}
+	
+	public void fromJSON(JSONObject json) throws JSONException
+	{
+		this.setMinSpeed(json.getInt("minSpeed"));
+		this.setSpeedThreshold(json.getInt("speedThreshold"));
+		this.setOrderTimeout(json.getInt("orderTimeout"));
+		this.setClampSpeed(json.getBoolean("clampSpeed"));
+		this.setkP((float) json.getDouble("kP"));
+	}
+	
+	@Override
+	public String toString() {
+		try {
+			return this.toJSON().toString();
+		}
+		catch (Exception e) {
+			return super.toString();
+		}
 	}
 
 }

@@ -28,32 +28,81 @@
 			height: 100%;
 		}
 
+        .box {
+            opacity: 0.5;
+            color: white;
+            background-color: #808080;
+            margin: 5px;
+            padding: 5px;
+        }
+
 		.controls {
-			padding: 10px;
-			float: left;
+            position: absolute;
+            width: 150px;
+            height: 150px;
 		}
 
 		.controls .btn {
-			width: 100px;
+			width: 50px;
+            height: 50px;
 		}
 
-        .status {
-            float: right;
-            color: white;
-            padding: 5px;
-            width: 200px;
+        .controls .btn-robot-forward {
+            position: relative;
+            top: 0px;
+            left: 51px;
         }
+
+        .controls .btn-robot-backward {
+            position: relative;
+            top: 101px;
+            left: -3px;
+        }
+        
+        .controls .btn-robot-left {
+            position: relative;
+            top: 1px;
+            left: 0px;
+        }
+        
+        .controls .btn-robot-right {
+            position: relative;
+            top: 1px;
+            left: 48px;
+        }
+        
+        .controls .btn-robot-stop {
+            position: relative;
+            top: -49px;
+            left: 51px;
+        }
+
+        .information {
+            float: left;
+            width: 300px;
+        }
+
+        .information .container {
+
+        }
+
+        .settings {
+            float: right;
+            width: 280px;
+        }
+
     </style>
 
     <script type="text/javascript">
     	var robotIp = "";
+        var robot = null;
 
     	function getBaseUrl() {
     		return "/robot";
     	}
 
     	function showMessage(msg) {
-    		$('.output').html(msg);
+    		$('#output').html(msg);
     	}
 
     	function updateCamera() {
@@ -101,23 +150,54 @@
 
         function updateStatus() {
             $.get(getBaseUrl() + "/status", function(response) {
-                var robot = $.parseJSON(response);
-
-                $('#status-motor-left').html(robot.left);
-                $('#status-motor-right').html(robot.right);
-                $('#status-heading-current').html(180.0 / Math.PI * robot.currentHeading);
-                $('#status-heading-desired').html(180.0 / Math.PI * robot.desiredHeading);
+                robot = $.parseJSON(response);
+                refreshInfoFields();
             });
-            setTimeout(updateStatus, 500);
+            setTimeout(updateStatus, 1000);
+        }
+
+        function updateRobot() {
+            robot.kP = $('#settings-kP').val();
+            robot.orderTimeout = $('#settings-order-timeout').val();
+
+            if (robot) {
+                $.ajax({
+                    url: getBaseUrl() + '/update',
+                    type: 'PUT',
+                    data: JSON.stringify(robot),
+                    success: function(result) {
+                        refreshInfoFields();
+                    }
+                });
+            }
+        }
+
+        function refreshInfoFields()
+        {
+            $('#status-motor-left').html(robot.left);
+            $('#status-motor-right').html(robot.right);
+            $('#status-heading-current').html(180.0 / Math.PI * robot.currentHeading);
+            $('#status-heading-desired').html(180.0 / Math.PI * robot.desiredHeading);
+            $('#status-kP').html(robot.kP);
+            $('#status-order-timeout').html(robot.orderTimeout);
+            $('#status-min-speed').html(robot.minSpeed);
+            $('#status-speed-threshold').html(robot.speedThreshold);
+            $('#status-clamp-speed').html(robot.clampSpeed ? 'true' : 'false');
         }
 
     	function startConsole() {
+
+            $('.controls')
+                .css('top', $(window).height() - $('.controls').height() - 50)
+                .css('left', 0.5 * ($(window).width() - $('.controls').width()));
 
     		$('.btn-robot-forward').click(moveRobotForward);
     		$('.btn-robot-backward').click(moveRobotBackward);
     		$('.btn-robot-left').click(rotateRobotLeft);
     		$('.btn-robot-right').click(rotateRobotRight);
     		$('.btn-robot-stop').click(stopRobot);
+
+            $('#btn-settings-update').click(updateRobot);
 
     		updateCamera();
             updateStatus();
@@ -131,28 +211,72 @@
 <body>
     <div id="console" class="console">
     	<div class="camera"></div>
-    	<div class="controls">
-    		<button class="btn btn-robot-forward">Forward</button>
-    		<button class="btn btn-robot-backward">Backward</button>
-    		<button class="btn btn-robot-left">Left</button>
-    		<button class="btn btn-robot-right">Right</button>
-    		<button class="btn btn-robot-stop">Stop</button>
-    		<span class="output">Robot Idle</span>
+
+    	<div class="box controls">
+    		<button class="btn btn-robot-forward">FWD</button>
+    		<button class="btn btn-robot-backward">BWD</button>
+    		<button class="btn btn-robot-left">LFT</button>
+    		<button class="btn btn-robot-right">RGT</button>
+    		<button class="btn btn-robot-stop">STP</button>
     	</div>
-        <div class="status">
-            <div class="status-line">
-                Left Motor:&nbsp;<span class="status-value" id="status-motor-left">N/A</span>
+
+        <div class="information">
+            <div class="box container">
+                <span class="line" id="output">Robot Idle</span>
             </div>
-            <div class="status-line">
-                Right Motor:&nbsp;<span class="status-value" id="status-motor-right">N/A</span>
-            </div>
-            <div class="status-line">
-                Current Heading:&nbsp;<span class="status-value" id="status-heading-current">N/A</span>
-            </div>
-            <div class="status-line">
-                Desired Heading:&nbsp;<span class="status-value" id="status-heading-desired">N/A</span>
+            <div class="box container">
+                <div class="line">
+                    Left Motor:&nbsp;<span class="value" id="status-motor-left">N/A</span>
+                </div>
+                <div class="line">
+                    Right Motor:&nbsp;<span class="value" id="status-motor-right">N/A</span>
+                </div>
+                <div class="line">
+                    Current Heading:&nbsp;<span class="value" id="status-heading-current">N/A</span>
+                </div>
+                <div class="line">
+                    Desired Heading:&nbsp;<span class="value" id="status-heading-desired">N/A</span>
+                </div>
+                <div>
+                    P. Gain:&nbsp;<span class="value" id="status-kP">N/A</span>
+                </div>
+                <div>
+                    Order Timeout (ms):&nbsp;<span class="value" id="status-order-timeout">N/A</span>
+                </div>
+                <div>
+                    Min Speed:&nbsp;<span class="value" id="status-min-speed">N/A</span>
+                </div>
+                <div>
+                    Speed Threshold:&nbsp;<span class="value" id="status-speed-threshold">N/A</span>
+                </div>
+                <div>
+                    Clamp Speed:&nbsp;<span class="value" id="status-clamp-speed">N/A</span>
+                </div>
             </div>
         </div>
+
+        <div class="box settings">
+            <div>
+                <span>P. Gain:&nbsp;</span>
+                <input type"text" id="settings-kP" value="30"/>
+            </div>
+            <div>
+                <span>Order Timeout&nbsp;(ms):&nbsp;</span>
+                <input type"text" id="settings-order-timeout" value="200"/>
+            </div>
+            <div>
+                <span>Min Speed:&nbsp;</span>
+                <input type"text" id="settings-min-speed" value="90"/>
+            </div>
+            <div>
+                <span>Speed Th.:&nbsp;</span>
+                <input type"text" id="settings-speed-threshold" value="10"/>
+            </div>
+            <div>
+                <button id="btn-settings-update">Update</button>
+            </div>
+        </div>
+
 	</div>
 </body>
 </html>

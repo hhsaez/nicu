@@ -19,6 +19,7 @@ import com.nicu.httpd.handlers.RotateLeftHandler;
 import com.nicu.httpd.handlers.RotateRightHandler;
 import com.nicu.httpd.handlers.StatusHandler;
 import com.nicu.httpd.handlers.StopMovementHandler;
+import com.nicu.httpd.handlers.UpdateHandler;
 import com.nicu.model.Robot;
 import com.nicu.utils.Log;
 
@@ -34,7 +35,6 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorE
 	public MainViewModel(MainActivity activity)
 	{
 		Robot.getInstance().addObserver(this);
-//		Robot.getInstance().setEnsureSpeeds(true);
 		
 		this.activity = activity;
 		
@@ -48,6 +48,7 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorE
 		this.httpServer.registerHandler(new RotateLeftHandler());
 		this.httpServer.registerHandler(new RotateRightHandler());
 		this.httpServer.registerHandler(new StopMovementHandler());
+		this.httpServer.registerHandler(new UpdateHandler());
 	}
 	
 	public void onResume()
@@ -128,8 +129,10 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorE
 	}
 	
 	public void changeMotorsSpeed(int left, int right, int timeout) {
-		String command = "L " + left + " R " + right + " S timeout";
-		Log.debug(command);
+		String command = "L " + left + " R " + right;
+		if (timeout > 0) {
+			command += " S timeout";
+		}
 		BTManager.getInstance().sendData(command);
 	}
 

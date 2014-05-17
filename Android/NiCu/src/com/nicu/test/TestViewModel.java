@@ -16,6 +16,7 @@ import com.nicu.httpd.handlers.RotateLeftHandler;
 import com.nicu.httpd.handlers.RotateRightHandler;
 import com.nicu.httpd.handlers.StatusHandler;
 import com.nicu.httpd.handlers.StopMovementHandler;
+import com.nicu.httpd.handlers.UpdateHandler;
 import com.nicu.model.Robot;
 
 public class TestViewModel implements Robot.Observer, SensorEventListener {
@@ -31,7 +32,6 @@ public class TestViewModel implements Robot.Observer, SensorEventListener {
 		this.sensorManager = (SensorManager) this.activity.getSystemService(Context.SENSOR_SERVICE);
 		
 		Robot.getInstance().addObserver(this);
-		Robot.getInstance().setEnsureSpeeds(true);
 		
 		this.httpServer = new NiCuHTTPD(this.activity);
 		this.httpServer.registerHandler(new StatusHandler());
@@ -41,6 +41,7 @@ public class TestViewModel implements Robot.Observer, SensorEventListener {
 		this.httpServer.registerHandler(new RotateLeftHandler());
 		this.httpServer.registerHandler(new RotateRightHandler());
 		this.httpServer.registerHandler(new StopMovementHandler());
+		this.httpServer.registerHandler(new UpdateHandler());
 	}
 	
 	public void onResume()
