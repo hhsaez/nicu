@@ -45,6 +45,8 @@ public class Robot {
 	
 	private boolean running = false;
 	
+	private int[] sensors = new int[3];
+	
 	public Robot() {
 		
 	}
@@ -215,6 +217,14 @@ public class Robot {
 		this.speedThreshold = speedThreshold;
 	}
 
+	public int[] getSensors() {
+		return sensors;
+	}
+
+	public void setSensors(int[] sensors) {
+		this.sensors = sensors;
+	}
+
 	public JSONObject toJSON() throws JSONException
 	{
 		JSONObject json = new JSONObject();
@@ -227,6 +237,7 @@ public class Robot {
 		json.put("orderTimeout", this.getOrderTimeout());
 		json.put("clampSpeed", this.getClampSpeed());
 		json.put("kP", this.getkP());
+		json.put("sensors", this.getSensors());
 		return json;
 	}
 	

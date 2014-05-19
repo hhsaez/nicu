@@ -94,6 +94,7 @@ public class BTManager {
 		if (socket != null) {
 			try {
 				this.deviceThread = new DeviceConnectedThread(socket, this);
+				this.deviceThread.run();
 			}
 			catch (IOException e) {
 				return false;
@@ -134,9 +135,8 @@ public class BTManager {
 	
 	public void onDataReceived(int byteCount, byte[] bytes)
 	{
-		String str;
 		try {
-			str = new String(bytes, "UTF-8");
+			String str = new String(bytes, "UTF-8");
 			this.getObserver().onDataReceived(str);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();

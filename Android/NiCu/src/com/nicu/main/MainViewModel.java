@@ -131,7 +131,7 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorE
 	public void changeMotorsSpeed(int left, int right, int timeout) {
 		String command = "L " + left + " R " + right;
 		if (timeout > 0) {
-			command += " S timeout";
+			command += " S " + timeout;
 		}
 		BTManager.getInstance().sendData(command);
 	}
@@ -175,6 +175,24 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorE
 	
 	@Override
 	public void onDataReceived(String data) {
+		
+		/*
+		Log.debug("Input: " + data);
+		String[] values = data.replace("\"", "").split(" ");
+		Log.debug("Sensors: " + values.length);
+		for (int i = 0; i < values.length; i++) {
+			Log.debug("values[" + i + "] = " + values[i]);
+		}
+		int[] sensors = Robot.getInstance().getSensors();
+		if (values.length == sensors.length) {
+			for (int i = 0; i < values.length; i++) {
+				int val = Integer.parseInt(values[i]);
+				sensors[i] = val;
+			}
+			Robot.getInstance().setSensors(sensors);
+		}
+		*/
+		
 		this.activity.onData(data);
 	}
 	

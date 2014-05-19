@@ -3,17 +3,21 @@ package com.nicu.bluetooth;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.bluetooth.BluetoothSocket;
 
 import com.nicu.utils.Log;
 
-public class DeviceConnectedThread extends Thread {
+public class DeviceConnectedThread {
 
 	private final BluetoothSocket socket;
 	private final InputStream inStream;
 	private final OutputStream outStream;
 	private final BTManager btManager;
+	
+	private boolean running = false; 
 
 	public DeviceConnectedThread(BluetoothSocket socket, BTManager manager) throws IOException {
 		this.socket = socket;
@@ -25,24 +29,43 @@ public class DeviceConnectedThread extends Thread {
 	}
 
 	public void run() {
-		byte[] buffer = new byte[1024]; // buffer store for the stream
-		int bytes; // bytes returned from read()
-
-		// Keep listening to the InputStream until an exception occurs
-		while (true) {
-			try {
-				// Read from the InputStream
-				bytes = this.inStream.read(buffer);
-				// Send the obtained bytes to the UI activity
-				btManager.onDataReceived(bytes, buffer);
-//				mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
-//						.sendToTarget();
-			} catch (IOException e) {
-				e.printStackTrace();
-				Log.error("Cannot read data: " + e.getMessage());
-				break;
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				byte[] buffer = new byte[1024]; // buffer store for the stream
+				int bytes; // bytes returned from read()
+				
+				running = true;
+				
+				List<Byte> line = new ArrayList<Byte>();
+				while (running) {
+					try {
+						// Read from the InputStream
+						bytes = inStream.read(buffer);
+						for (int i = 0; i < bytes; i++) {
+							if (buffer[i] == '\n') {
+								// send data to manager only when we've got a full line
+								byte[] result = new byte[line.size()];
+								for (int j = 0; j < result.length; j++) {
+									result[j] = line.get(j);
+								}
+								btManager.onDataReceived(result.length, result);
+							}
+							else {
+								line.add(buffer[i]);
+							}
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+						Log.error("Cannot read data: " + e.getMessage());
+						break;
+					}
+				}
+				
+				Log.info("Connection thread stopped");
 			}
-		}
+		}).start();
 	}
 
 	/* Call this from the main activity to send data to the remote device */
@@ -53,6 +76,7 @@ public class DeviceConnectedThread extends Thread {
 	/* Call this from the main activity to shutdown the connection */
 	public void cancel() throws IOException {
 		socket.close();
+		this.running = false;
 	}
 
 }
