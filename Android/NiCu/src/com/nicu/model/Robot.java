@@ -3,8 +3,13 @@ package com.nicu.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.nicu.model.controllers.GoToAngleController;
+import com.nicu.model.controllers.RobotController;
+import com.nicu.model.controllers.StopController;
 
 public class Robot {
 	
@@ -35,9 +40,10 @@ public class Robot {
 	private float currentHeading = 0;
 	private float desiredHeading = 0;
 	
-	private float L = 10.0f;	// distance between wheels
-	private float R = 2.5f;		// wheel radius
-	private float V = 0.0f;		// current velocity [-100, 100]
+	private float length = 10.0f;	// distance between wheels
+	private float radius = 2.5f;		// wheel radius
+	
+	private float velocity = 0.0f;	// current velocity [-100, 100]
 	
 	private float kP = 30.0f;	// proportional gain
 	
@@ -46,6 +52,8 @@ public class Robot {
 	private boolean running = false;
 	
 	private int[] sensors = new int[3];
+	
+	private RobotController controller = new StopController();
 	
 	public Robot() {
 		
@@ -95,96 +103,6 @@ public class Robot {
 		return this.desiredHeading;
 	}
 	
-	public void moveForward() {
-		setDesiredHeading(getCurrentHeading());
-		V = 2.0f * MOTOR_MAX_SPEED;
-	}
-	
-	public void turnLeft() {
-		setDesiredHeading(getCurrentHeading() - (float)Math.PI / 2.0f);
-		V = 0.0f;
-	}
-	
-	public void turnRight() {
-		setDesiredHeading(getCurrentHeading() + (float)Math.PI / 2.0f);
-		V = 0.0f;
-	}
-	
-	public void turnBack() {
-		setDesiredHeading(getCurrentHeading() + (float)Math.PI);
-		V = 0.0f;
-	}
-	
-	public void stop() {
-		setDesiredHeading(getCurrentHeading());
-		V = 0.0f;
-	}
-	
-	private void setMotorsSpeed(int left, int right) {
-		this.leftMotorSpeed = clampSpeedIfNeeded(left);
-		this.rightMotorSpeed = clampSpeedIfNeeded(right);
-		
-		for (Observer o : this.observers) {
-			o.onSpeedChanged(this);
-		}
-	}
-
-	private int clampSpeedIfNeeded(int input) {
-		if (this.clampSpeed) {
-			if (input < -getSpeedThreshold() && input > -getMinSpeed()) {
-				return -getMinSpeed();
-			}
-			else if (input > getSpeedThreshold() && input < getMinSpeed()) {
-				return getMinSpeed();
-			}
-			else {
-				return input;
-			}
-		}
-		else {
-			return Math.max(-MOTOR_MAX_SPEED, Math.min(MOTOR_MAX_SPEED, input));
-		}
-	}
-	
-	public boolean isRunning() {
-		return this.running;
-	}
-	
-	public void run() {
-		this.running = true;
-		
-		stop();
-		
-		new Thread(new Runnable() {
-			
-			private long lastTime = 0;
-			
-			@Override
-			public void run() {
-				while (running) {
-					long currentTime = System.currentTimeMillis();
-					if (currentTime - lastTime > 1000) {
-						lastTime = currentTime;
-						
-						float e_k = getCurrentHeading() - getDesiredHeading();
-						e_k = (float) Math.atan2(Math.sin(e_k), Math.cos(e_k));
-						
-						float w = kP * e_k;
-						
-						float vR = (2.0f * V + w * L ) / (2.0f * R);
-						float vL = (2.0f * V - w * L ) / (2.0f * R);
-						
-						setMotorsSpeed((int) vL, (int) vR);
-					}
-				}
-			}
-		}).start();
-	}
-	
-	public void shutdown() {
-		this.running = false;
-	}
-	
 	public int getOrderTimeout() {
 		return orderTimeout;
 	}
@@ -225,6 +143,124 @@ public class Robot {
 		this.sensors = sensors;
 	}
 
+	public float getVelocity() {
+		return velocity;
+	}
+
+	public void setVelocity(float velocity) {
+		this.velocity = velocity;
+	}
+
+	public float getLength() {
+		return length;
+	}
+
+	public void setLength(float length) {
+		this.length = length;
+	}
+
+	public float getRadius() {
+		return radius;
+	}
+
+	public void setRadius(float radius) {
+		this.radius = radius;
+	}
+
+	public RobotController getController() {
+		return controller;
+	}
+
+	public void setController(RobotController controller) {
+		this.controller = controller;
+	}
+	
+	public void moveForward() {
+		setDesiredHeading(getCurrentHeading());
+		setVelocity(2.0f * MOTOR_MAX_SPEED);
+		setController(new GoToAngleController());
+	}
+	
+	public void turnLeft() {
+		setDesiredHeading(getCurrentHeading() - (float)Math.PI / 2.0f);
+		setVelocity(0.0f);
+		setController(new GoToAngleController());
+	}
+	
+	public void turnRight() {
+		setDesiredHeading(getCurrentHeading() + (float)Math.PI / 2.0f);
+		setVelocity(0.0f);
+		setController(new GoToAngleController());
+	}
+	
+	public void turnBack() {
+		setDesiredHeading(getCurrentHeading() + (float)Math.PI);
+		setVelocity(0.0f);
+		setController(new GoToAngleController());
+	}
+	
+	public void stop() {
+		setDesiredHeading(getCurrentHeading());
+		setVelocity(0.0f);
+		setController(new StopController());
+	}
+	
+	public void setMotorsSpeed(int left, int right) {
+		this.leftMotorSpeed = clampSpeedIfNeeded(left);
+		this.rightMotorSpeed = clampSpeedIfNeeded(right);
+		
+		for (Observer o : this.observers) {
+			o.onSpeedChanged(this);
+		}
+	}
+
+	private int clampSpeedIfNeeded(int input) {
+		if (this.clampSpeed) {
+			if (input < -getSpeedThreshold() && input > -getMinSpeed()) {
+				return -getMinSpeed();
+			}
+			else if (input > getSpeedThreshold() && input < getMinSpeed()) {
+				return getMinSpeed();
+			}
+			else {
+				return input;
+			}
+		}
+		else {
+			return Math.max(-MOTOR_MAX_SPEED, Math.min(MOTOR_MAX_SPEED, input));
+		}
+	}
+	
+	public boolean isRunning() {
+		return this.running;
+	}
+	
+	public void run() {
+		this.running = true;
+		
+		stop();
+		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				long lastTime = 0;
+
+				while (running) {
+					long currentTime = System.currentTimeMillis();
+					if (currentTime - lastTime > 1000) {
+						lastTime = currentTime;
+						getController().execute(Robot.this);
+					}
+				}
+			}
+		}).start();
+	}
+	
+	public void shutdown() {
+		this.running = false;
+	}
+
 	public JSONObject toJSON() throws JSONException
 	{
 		JSONObject json = new JSONObject();
@@ -237,7 +273,14 @@ public class Robot {
 		json.put("orderTimeout", this.getOrderTimeout());
 		json.put("clampSpeed", this.getClampSpeed());
 		json.put("kP", this.getkP());
-		json.put("sensors", this.getSensors());
+		json.put("velocity", this.getVelocity());
+		
+		JSONArray sensorsJson = new JSONArray();
+		for (int i = 0; i < this.sensors.length; i++) {
+			sensorsJson.put(this.sensors[i]);
+		}
+		json.put("sensors", sensorsJson);
+		
 		return json;
 	}
 	

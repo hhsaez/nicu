@@ -174,15 +174,16 @@
 
         function refreshInfoFields()
         {
-            $('#status-motor-left').html(robot.left);
-            $('#status-motor-right').html(robot.right);
-            $('#status-heading-current').html(180.0 / Math.PI * robot.currentHeading);
-            $('#status-heading-desired').html(180.0 / Math.PI * robot.desiredHeading);
-            $('#status-kP').html(robot.kP);
-            $('#status-order-timeout').html(robot.orderTimeout);
-            $('#status-min-speed').html(robot.minSpeed);
-            $('#status-speed-threshold').html(robot.speedThreshold);
-            $('#status-clamp-speed').html(robot.clampSpeed ? 'true' : 'false');
+            var parent = $('#robot-data');
+            parent.html('');
+
+            for (var key in robot) {
+               if (robot.hasOwnProperty(key)) {
+                    $('<div />')
+                        .html('' + key + '&nbsp;=&nbsp;<span class="value">' + robot[key] + '</span>')
+                        .appendTo(parent);
+                }
+            }
         }
 
     	function startConsole() {
@@ -224,34 +225,8 @@
             <div class="box container">
                 <span class="line" id="output">Robot Idle</span>
             </div>
-            <div class="box container">
-                <div class="line">
-                    Left Motor:&nbsp;<span class="value" id="status-motor-left">N/A</span>
-                </div>
-                <div class="line">
-                    Right Motor:&nbsp;<span class="value" id="status-motor-right">N/A</span>
-                </div>
-                <div class="line">
-                    Current Heading:&nbsp;<span class="value" id="status-heading-current">N/A</span>
-                </div>
-                <div class="line">
-                    Desired Heading:&nbsp;<span class="value" id="status-heading-desired">N/A</span>
-                </div>
-                <div>
-                    P. Gain:&nbsp;<span class="value" id="status-kP">N/A</span>
-                </div>
-                <div>
-                    Order Timeout (ms):&nbsp;<span class="value" id="status-order-timeout">N/A</span>
-                </div>
-                <div>
-                    Min Speed:&nbsp;<span class="value" id="status-min-speed">N/A</span>
-                </div>
-                <div>
-                    Speed Threshold:&nbsp;<span class="value" id="status-speed-threshold">N/A</span>
-                </div>
-                <div>
-                    Clamp Speed:&nbsp;<span class="value" id="status-clamp-speed">N/A</span>
-                </div>
+            <div id="robot-data" class="box container">
+                <!-- properties are automatically added -->
             </div>
         </div>
 
