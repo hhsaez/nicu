@@ -13,8 +13,6 @@ import com.nicu.model.controllers.StopController;
 
 public class Robot {
 	
-	public static final int MOTOR_MAX_SPEED = 100;
-	
 	private static Robot instance = null;
 	
 	public static Robot getInstance() {
@@ -31,9 +29,13 @@ public class Robot {
 	
 	private List<Observer> observers = new ArrayList<Observer>();
 	
+	private int leftMotorTrim = 0;
+	private int rightMotorTrim = 0;
+	
 	private int leftMotorSpeed = 0;
 	private int rightMotorSpeed = 0;
-	private int minSpeed = 90;
+	private int minSpeed = 10;
+	private int maxSpeed = 50;
 	private int speedThreshold = 10;
 	private boolean clampSpeed = false;
 	
@@ -45,9 +47,9 @@ public class Robot {
 	
 	private float velocity = 0.0f;	// current velocity [-100, 100]
 	
-	private float kP = 30.0f;	// proportional gain
+	private float kP = 5.0f;	// proportional gain
 	
-	private int orderTimeout = 200;
+	private int orderTimeout = 0;
 	
 	private boolean running = false;
 	
@@ -175,9 +177,25 @@ public class Robot {
 		this.controller = controller;
 	}
 	
+	public int getLeftMotorTrim() {
+		return leftMotorTrim;
+	}
+
+	public void setLeftMotorTrim(int leftMotorTrim) {
+		this.leftMotorTrim = leftMotorTrim;
+	}
+
+	public int getRightMotorTrim() {
+		return rightMotorTrim;
+	}
+
+	public void setRightMotorTrim(int rightMotorTrim) {
+		this.rightMotorTrim = rightMotorTrim;
+	}
+
 	public void moveForward() {
 		setDesiredHeading(getCurrentHeading());
-		setVelocity(2.0f * MOTOR_MAX_SPEED);
+		setVelocity(getMaxSpeed());
 		setController(new GoToAngleController());
 	}
 	
@@ -227,7 +245,7 @@ public class Robot {
 			}
 		}
 		else {
-			return Math.max(-MOTOR_MAX_SPEED, Math.min(MOTOR_MAX_SPEED, input));
+			return Math.max(-getMaxSpeed(), Math.min(getMaxSpeed(), input));
 		}
 	}
 	
@@ -248,7 +266,7 @@ public class Robot {
 
 				while (running) {
 					long currentTime = System.currentTimeMillis();
-					if (currentTime - lastTime > 1000) {
+					if (currentTime - lastTime > 500) {
 						lastTime = currentTime;
 						getController().execute(Robot.this);
 					}
@@ -266,6 +284,9 @@ public class Robot {
 		JSONObject json = new JSONObject();
 		json.put("left", this.getLeftMotorSpeed());
 		json.put("right", this.getRightMotorSpeed());
+		json.put("leftTrim", this.getLeftMotorTrim());
+		json.put("rightTrim", this.getRightMotorTrim());
+		json.put("maxSpeed", this.getMaxSpeed());
 		json.put("minSpeed", this.getMinSpeed());
 		json.put("speedThreshold", this.getSpeedThreshold());
 		json.put("currentHeading", this.getCurrentHeading());
@@ -287,10 +308,13 @@ public class Robot {
 	public void fromJSON(JSONObject json) throws JSONException
 	{
 		this.setMinSpeed(json.getInt("minSpeed"));
+		this.setMaxSpeed(json.getInt("maxSpeed"));
 		this.setSpeedThreshold(json.getInt("speedThreshold"));
 		this.setOrderTimeout(json.getInt("orderTimeout"));
 		this.setClampSpeed(json.getBoolean("clampSpeed"));
 		this.setkP((float) json.getDouble("kP"));
+		this.setLeftMotorTrim(json.getInt("leftTrim"));
+		this.setRightMotorTrim(json.getInt("rightTrim"));
 	}
 	
 	@Override
@@ -301,6 +325,14 @@ public class Robot {
 		catch (Exception e) {
 			return super.toString();
 		}
+	}
+
+	public int getMaxSpeed() {
+		return maxSpeed;
+	}
+
+	public void setMaxSpeed(int maxSpeed) {
+		this.maxSpeed = maxSpeed;
 	}
 
 }

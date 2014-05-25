@@ -15,8 +15,8 @@ public class GoToAngleController implements RobotController {
 		
 		float w = robot.getkP() * e_k;
 		
-		float vR = (2.0f * robot.getVelocity() + w * robot.getLength() ) / (2.0f * robot.getRadius());
-		float vL = (2.0f * robot.getVelocity() - w * robot.getLength() ) / (2.0f * robot.getRadius());
+		float vR = robot.getRightMotorTrim() + (2.0f * robot.getVelocity() + w * robot.getLength() ) / (2.0f * robot.getRadius());
+		float vL = robot.getLeftMotorTrim() + (2.0f * robot.getVelocity() - w * robot.getLength() ) / (2.0f * robot.getRadius());
 		
 		boolean movementAllowed = true;
 		for (int i = 0; i < robot.getSensors().length; i++) {

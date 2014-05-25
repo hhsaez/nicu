@@ -1,22 +1,22 @@
 #include "Ultrasonic.h"
+#include <Servo.h>
+
+#define LEFT_SERVO_PIN 6
+#define LEFT_SERVO_STOP 87
+
+#define RIGHT_SERVO_PIN 7
+#define RIGHT_SERVO_STOP 89
+
+Servo leftServo;
+int leftServoSpeed = LEFT_SERVO_STOP;
+Servo rightServo;
+int rightServoSpeed = LEFT_SERVO_STOP;
 
 // Sensors
 int SENSOR_WAIT_MS = 50;
 Ultrasonic leftSensor( 8, 9 ); // (Trig PIN,Echo PIN)
 Ultrasonic centerSensor( 11, 10 ); // (Trig PIN,Echo PIN)
 Ultrasonic rightSensor( 13, 12 ); // (Trig PIN,Echo PIN)
-
-// Motors
-int MAX_SPEED = 255;
-int MIN_SPEED = 150;
-// rigth
-int ENA = 5;
-int IN1 = 2;
-int IN2 = 3;
-// left
-int ENB = 6;
-int IN3 = 4;
-int IN4 = 7;
 
 // utility
 unsigned long prevMillis;
@@ -56,83 +56,26 @@ void setupBT()
 
 void setupMotors()
 {
-  // setup motors
-  pinMode( ENA, OUTPUT );
-  pinMode( ENB, OUTPUT );
-  pinMode( IN1, OUTPUT );
-  pinMode( IN2, OUTPUT );
-  pinMode( IN3, OUTPUT );
-  pinMode( IN4, OUTPUT );
-  runMotors();
+  leftServo.attach(LEFT_SERVO_PIN);
+  rightServo.attach(RIGHT_SERVO_PIN);
 }
 
-void stopMotors() 
+void stopMotors()
 {
-  digitalWrite( ENA, LOW );
-  digitalWrite( ENB, LOW );
+  leftServo.write(LEFT_SERVO_STOP);
+  rightServo.write(RIGHT_SERVO_STOP);
 }
 
-void runMotors()
+void setLeftMotorSpeed(float value)
 {
-  digitalWrite( ENA, HIGH );
-  digitalWrite( ENB, HIGH );
+  int spd = (int)(LEFT_SERVO_STOP + 90 * (value / 100));
+  leftServoSpeed = constrain(spd, 0, 180);
 }
 
-void setMotorRForward()
+void setRightMotorSpeed(float value)
 {
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
-}
-
-void setMotorRBackward()
-{
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-}
-
-void setMotorLForward()
-{
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-}
-
-void setMotorLBackward()
-{
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
-}
-
-int computeEffectiveSpeed( int input )
-{
-  float spd = input / 100.0f;
-  if ( spd < 0 ) {
-    spd = -spd;
-  }
-  return (int)( spd * MAX_SPEED );
-}
-
-void setRightMotorSpeed(int spd)
-{
-  if (spd >= 0) {
-    setMotorRForward();
-    analogWrite( ENA, computeEffectiveSpeed( spd ) );
-  }
-  else {
-    setMotorRBackward();
-    analogWrite( ENA, computeEffectiveSpeed( -spd ) );
-  }
-}
-
-void setLeftMotorSpeed(int spd)
-{
-  if (spd >= 0) {
-    setMotorLForward();
-    analogWrite( ENB, computeEffectiveSpeed( spd ) );
-  }
-  else {
-    setMotorLBackward();
-    analogWrite( ENB, computeEffectiveSpeed( -spd ) );
-  }
+  int spd = (int)(RIGHT_SERVO_STOP - 90 * (value / 100));
+  rightServoSpeed = constrain(spd, 0, 180);
 }
 
 void setup() 
@@ -145,6 +88,7 @@ void setup()
   setupMotors();
   
   prevMillis = millis();
+  stopMotors();
 }
 
 void loop() 
@@ -161,18 +105,19 @@ void loop()
       case 'L': {
         int spd = Serial.parseInt();
         setLeftMotorSpeed( spd );
+        leftServo.write(leftServoSpeed);
         break;
       }
       case 'R': {
         int spd = Serial.parseInt();
         setRightMotorSpeed( spd );
+        rightServo.write(rightServoSpeed);
         break;
       }
       case 'S': {
         int t = Serial.parseInt();
         delay( t );
-        setLeftMotorSpeed( 0 );
-        setRightMotorSpeed( 0 );
+        stopMotors();
         break;
       }
       case 'W': {
@@ -186,8 +131,6 @@ void loop()
         break;
       }
       default: {
-//        Serial.print( "Unknown: " );
-//        Serial.println( c );
         break;
       }
     }

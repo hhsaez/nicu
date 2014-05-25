@@ -130,9 +130,6 @@ public class MainViewModel implements BLManagerObserver, Robot.Observer, SensorE
 	
 	public void changeMotorsSpeed(int left, int right, int timeout) {
 		String command = "L " + left + " R " + right;
-		if (timeout > 0) {
-			command += " S " + timeout;
-		}
 		BTManager.getInstance().sendData(command);
 	}
 
